@@ -1,0 +1,35 @@
+#!/bin/bash
+
+set -o pipefail
+set -e
+
+# Global settings
+SCRIPT=$(readlink -f "${0}")
+DIR=$(dirname "${SCRIPT}")
+cd "${DIR}" || exit 1
+
+# setup.py reads BUILD_VERSION; the "build" action sets it to the real
+# parsed version before rebuilding the venv for packaging, but this
+# editable install of the local checkout (further down) runs before that,
+# so give it a harmless placeholder if one isn't already set.
+export BUILD_VERSION="${BUILD_VERSION:-0.0.0.dev0}"
+
+# Configure and activate the virtual environment
+python3 -m venv venv
+. ./venv/bin/activate
+
+# Try to upgrade pip, but don't fail the script if it can't be upgraded
+if ! python3 -m pip install --upgrade pip ; then
+  echo "WARNING: failed to upgrade pip; continuing with existing version" >&2
+fi
+
+# Install from requirements, if present. This also editable-installs rsbt
+# itself (see requirements.txt), so _entrypoint.py's "import rsbt" below
+# resolves to this checkout.
+if [ -f requirements.txt ] ; then
+  python3 -m pip install -r ./requirements.txt
+fi
+
+exec python3 -u ./_entrypoint.py "$@"
+
+exit 1

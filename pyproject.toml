@@ -1,0 +1,22 @@
+[tool.black]
+line-length = 100
+
+[tool.pylint.format]
+max-line-length = 100
+
+[tool.pylint."MESSAGES CONTROL"]
+# redefined-outer-name/unused-argument: pytest's fixture mechanism works by
+# re-declaring a fixture name as a test function parameter, often without
+# using its value directly - that is the idiom, not a bug.
+# too-few-public-methods/too-many-instance-attributes/too-many-arguments/
+# too-many-positional-arguments: rsbt is a library of small, deliberately
+# thin helper/exception/value classes and plumbing functions; these
+# complexity metrics don't fit that shape.
+disable = [
+    "redefined-outer-name",
+    "unused-argument",
+    "too-few-public-methods",
+    "too-many-instance-attributes",
+    "too-many-arguments",
+    "too-many-positional-arguments",
+]

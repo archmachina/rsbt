@@ -1,0 +1,16 @@
+# Requirements file for CI/CD processes
+requests>=2.32.3
+black
+pylint
+build
+twine
+
+# Needed so "pylint src" can resolve test modules' "import pytest" - the
+# actual test run happens in the Docker testing image instead, which
+# installs this from src/tests/requirements.txt.
+pytest==9.0.3
+
+# rsbt uses itself to build, test and release itself: install this checkout
+# in editable mode so _entrypoint.py's "import rsbt" resolves to the local
+# source tree rather than a previously published PyPI release.
+-e .

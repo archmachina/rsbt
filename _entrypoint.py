@@ -50,7 +50,14 @@ def clean():
 
 @action
 def pr_main():
-    # A PR into main just needs to build and test cleanly
+    # Run a build and test for PRs to the main branch
+    build()
+    test()
+
+
+@action
+def push_main():
+    # Run a build and test for pushes to the main branch
     build()
     test()
 

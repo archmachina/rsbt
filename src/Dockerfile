@@ -5,7 +5,7 @@ ARG use_image=base
 
 ################
 # Base image
-FROM python:3.13-slim AS base
+FROM python:3.15-slim AS base
 
 # git is required at runtime by rsbt's Util.git_* helpers, and by this
 # image's own test suite, which exercises them against real git repos

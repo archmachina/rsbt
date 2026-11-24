@@ -40,6 +40,21 @@ def git_repo(tmp_path, monkeypatch):
     return tmp_path
 
 
+def _create_merge_commit(git_repo):
+    """Branch, commit, and merge (--no-ff) into git_repo; return the merge commit's short SHA."""
+    rsbt.exec_cmd(["git", "checkout", "-b", "feature"])
+    (git_repo / "feature.txt").write_text("feature\n")
+    rsbt.exec_cmd(["git", "add", "feature.txt"])
+    rsbt.exec_cmd(["git", "commit", "-m", "Feature commit"])
+
+    # Back to the branch we started from, then force a merge commit even
+    # though this merge could have fast-forwarded
+    rsbt.exec_cmd(["git", "checkout", "-"])
+    rsbt.exec_cmd(["git", "merge", "--no-ff", "feature", "-m", "Merge commit"])
+
+    return rsbt.exec_cmd(["git", "log", "-1", "--format=%h"], capture=True).stdout.strip()
+
+
 class TestGitHelpers:
     """Exercises Util's git metadata helpers against a real throwaway repo."""
 
@@ -52,6 +67,28 @@ class TestGitHelpers:
 
         assert sha == expected
         assert sha != ""
+
+    def test_git_sha_rejects_non_bool_ignore_merges(self, git_repo):
+        """A non-bool ignore_merges argument raises ArgumentException."""
+        with pytest.raises(rsbt.ArgumentException):
+            rsbt.Util.git_sha(ignore_merges="yes")
+
+    def test_git_sha_with_ignore_merges_false_returns_head_even_if_a_merge(self, git_repo):
+        """With ignore_merges=False (the default), HEAD's own SHA is returned, merge or not."""
+        merge_sha = _create_merge_commit(git_repo)
+
+        assert rsbt.Util.git_sha().strip() == merge_sha
+        assert rsbt.Util.git_sha(ignore_merges=False).strip() == merge_sha
+
+    def test_git_sha_with_ignore_merges_true_skips_a_leading_merge_commit(self, git_repo):
+        """With ignore_merges=True, a merge commit at HEAD is skipped for the commit before it."""
+        _create_merge_commit(git_repo)
+
+        non_merge_sha = rsbt.exec_cmd(
+            ["git", "log", "-1", "--no-merges", "--format=%h"], capture=True
+        ).stdout.strip()
+
+        assert rsbt.Util.git_sha(ignore_merges=True).strip() == non_merge_sha
 
     def test_git_latest_tag_empty_when_untagged(self, git_repo):
         """git_latest_tag() returns an empty string when the repo has no tags."""

@@ -159,6 +159,24 @@ class TestTestingSession:
         with pytest.raises(rsbt.BuildFailure):
             ts.run()
 
+    def test_failure_message_names_only_the_failed_commands(self, monkeypatch):
+        """The BuildFailure message names the command(s) that failed, not the ones that passed."""
+
+        def fake_bash(cmd, **kwargs):
+            status = rsbt.ExecStatus()
+            status.returncode = 0 if cmd == "pass" else 1
+            return status
+
+        monkeypatch.setattr(rsbt, "bash", fake_bash)
+
+        ts = rsbt.TestingSession(["pass", "fail"])
+
+        with pytest.raises(rsbt.BuildFailure) as excinfo:
+            ts.run()
+
+        assert "fail" in str(excinfo.value)
+        assert "pass" not in str(excinfo.value)
+
     def test_passes_when_every_command_succeeded(self, monkeypatch):
         """run() does not raise when every command's returncode was 0."""
 
@@ -192,3 +210,21 @@ class TestLintingSession:
 
         with pytest.raises(rsbt.BuildFailure):
             rsbt.LintingSession(["pylint src"]).run()
+
+    def test_failure_message_names_only_the_failed_commands(self, monkeypatch):
+        """The BuildFailure message names the command(s) that failed, not the ones that passed."""
+
+        def fake_bash(cmd, **kwargs):
+            status = rsbt.ExecStatus()
+            status.returncode = 0 if cmd == "pylint src" else 1
+            return status
+
+        monkeypatch.setattr(rsbt, "bash", fake_bash)
+
+        ls = rsbt.LintingSession(["pylint src", "black --diff src"])
+
+        with pytest.raises(rsbt.BuildFailure) as excinfo:
+            ls.run()
+
+        assert "black --diff src" in str(excinfo.value)
+        assert "pylint src" not in str(excinfo.value)

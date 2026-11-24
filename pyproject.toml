@@ -12,6 +12,13 @@ max-line-length = 100
 # too-many-positional-arguments: rsbt is a library of small, deliberately
 # thin helper/exception/value classes and plumbing functions; these
 # complexity metrics don't fit that shape.
+# cyclic-import: a few submodules deliberately `import rsbt` and call back
+# through it (e.g. rsbt.bash, rsbt.exec_cmd, rsbt.actions) instead of
+# importing the name directly, so that the test suite's monkeypatching of
+# those top-level rsbt attributes is seen by the code that uses them. The
+# resulting rsbt -> submodule -> rsbt cycle never runs at import time (only
+# inside function bodies, after the package has fully initialised), so it
+# is safe despite the warning.
 disable = [
     "redefined-outer-name",
     "unused-argument",
@@ -19,4 +26,5 @@ disable = [
     "too-many-instance-attributes",
     "too-many-arguments",
     "too-many-positional-arguments",
+    "cyclic-import",
 ]

@@ -4,6 +4,7 @@ black
 pylint
 build
 twine
+dfbar==0.4.7
 
 # Needed so "pylint src" can resolve test modules' "import pytest" - the
 # actual test run happens in the Docker testing image instead, which

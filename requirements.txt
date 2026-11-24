@@ -8,7 +8,7 @@ twine
 # Needed so "pylint src" can resolve test modules' "import pytest" - the
 # actual test run happens in the Docker testing image instead, which
 # installs this from src/tests/requirements.txt.
-pytest==9.0.3
+pytest==9.2.0
 
 # rsbt uses itself to build, test and release itself: install this checkout
 # in editable mode so _entrypoint.py's "import rsbt" resolves to the local

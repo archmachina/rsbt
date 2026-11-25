@@ -1,14 +1,18 @@
 ---
 
-name: pr_main
+name: lint
 on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
   pull_request:
     branches:
       - main
 
 jobs:
-  pr_main:
-    name: "pr_main"
+  lint:
+    name: "lint"
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -23,7 +27,7 @@ jobs:
           python-version: '3.x'
           cache: 'pip'
 
-      - name: pr_main
+      - name: lint
         shell: bash
         run: |
-          ./entrypoint pr_main
+          ./entrypoint lint

@@ -1,18 +1,15 @@
 ---
 
-name: linting
+name: test
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
   pull_request:
     branches:
       - main
 
 jobs:
-  linting_main:
-    name: "linting"
+  test:
+    name: "test"
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -27,7 +24,7 @@ jobs:
           python-version: '3.x'
           cache: 'pip'
 
-      - name: linting
+      - name: test
         shell: bash
         run: |
-          ./entrypoint lint
+          ./entrypoint test

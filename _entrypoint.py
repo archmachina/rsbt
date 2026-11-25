@@ -49,30 +49,24 @@ def clean():
 
 
 @action
-def pr_main():
-    # Run a build and test for PRs to the main branch
-    build()
-    test()
-
-
-@action
-def push_main():
-    # Run a build and test for pushes to the main branch
-    build()
-    test()
-
-
-@action
 def release():
     # Make sure we have a github version to base the release on
     ref = os.environ.get("GITHUB_REF", "")
     if ref == "":
         Util.fail("Missing github version reference")
 
-    bs.update_version([ref])
+    # A "v*" tag push is a real release; a push to main is just a
+    # build/test gate with nothing published
+    is_tag = ref.startswith("refs/tags/v")
+    if is_tag:
+        bs.update_version([ref])
 
     build()
     test()
+
+    if not is_tag:
+        print("Not a version tag -- build/test only, nothing to publish", flush=True)
+        return
 
     # Publish the package to PyPI
     pys.publish("__token__", os.environ["PYPI_TOKEN"])
